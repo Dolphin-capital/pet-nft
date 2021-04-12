@@ -6,3 +6,6 @@ artifacts
 cache
 types
 Shop.sol
+TokenPet.sol
+TokenPetFood.sol
+NFTPet.sol

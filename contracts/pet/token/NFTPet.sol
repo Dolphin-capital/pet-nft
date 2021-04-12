@@ -75,6 +75,15 @@ contract NFTPet is ERC721('NFT PET', 'NFT.PET'), Manager, INFTPet {
         }
         return (pets,balance);
     }
+    function getPets() external view override returns (Pet[] memory) {
+        uint256 balance = balanceOf(msg.sender);
+        Pet[] memory pets = new Pet[](balance);
+        for (uint256 i = 0; i < balance; i++) {
+            uint256 tokenId = tokenOfOwnerByIndex(msg.sender, i);
+            pets[i] = Pets[tokenId.sub(1)];
+        }
+        return pets;
+    }
     function tokenUri(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 

@@ -16,6 +16,7 @@ interface INFTPet is INFTPetStruct {
     function getPetTokenIds() external view returns (uint256[] memory);
     function getPetByTokenId(uint256 _tokenId) external view returns (Pet memory);
     function getPets(uint256 page) external view returns (Pet[] memory,uint256);
+    function getPets() external view returns (Pet[] memory);
     function tokenUri(uint256 tokenId) external view returns (string memory);
     function setBaseURI(string memory _baseURI) external;
     function addSerialProperty(string memory _uri, uint64 _addition) external;
