@@ -17,16 +17,13 @@ contract NFTPet is ERC721('NFT PET', 'NFT.PET'), Manager, INFTPet {
     using SafeMath64 for uint64;
     using SafeMath32 for uint32;
     using String for string;
-    //宠物集合，索引下表+1 = tokenId
     Pet[] private Pets;
-    //编号属性(相当于图鉴)
     SerialProperty  serialProperty;
 
     constructor(string memory baseURI) public {
         setBaseURI(baseURI);
     }
 
-    //管理员可以铸造新宠物
     function mintPet(address _to, uint64 _serialNum, uint64 _level, uint64 _growthValue, uint64 _coolTime, bool _bonus) external override onlyManagers returns (uint256 tokenId)  {
         tokenId = Pets.length.add(1);
         uint64 _addition = serialProperty.serialToAddition[_serialNum];
@@ -35,12 +32,10 @@ contract NFTPet is ERC721('NFT PET', 'NFT.PET'), Manager, INFTPet {
         setTokenURI(tokenId);
         emit MintPet(_to, tokenId, _serialNum, _level, _growthValue, _coolTime, _addition, _bonus);
     }
-    //管理员可以销毁宠物
     function burnPet(uint256 _tokenId) external override onlyManagers {
         super._burn(_tokenId);
         emit BurnPet(_tokenId);
     }
-    //管理员可以改变宠物的属性
     function updatePet(uint256 _tokenId, uint64 _level, uint64 _growthValue, uint64 _coolTime, bool _bonus) external override onlyManagers {
         Pets[_tokenId.sub(1)].level = _level;
         Pets[_tokenId.sub(1)].growthValue = _growthValue;
@@ -49,23 +44,19 @@ contract NFTPet is ERC721('NFT PET', 'NFT.PET'), Manager, INFTPet {
         setTokenURI(_tokenId);
         emit UpdatePet(_tokenId, _level, _growthValue, _coolTime, _bonus);
     }
-    //获取该用户拥有的PetID的集合
     function getPetTokenIds() external view override returns (uint256[] memory){
         uint256 balance = balanceOf(msg.sender);
         uint256[] memory ids = new uint256[](balance);
         for (uint256 i = 0; i < balance; i++) {
-            //一个用户拥有多个
             uint256 tokenId = tokenOfOwnerByIndex(msg.sender, i);
             ids[i] = tokenId;
         }
         return ids;
     }
-    //通过tokenId获取Pet属性
     function getPetByTokenId(uint256 _tokenId) public view override returns (Pet memory) {
         require(_tokenId > 0, "tokenId can not be zero");
         return Pets[_tokenId.sub(1)];
     }
-    //获取该用户拥有的Pet属性的集合
     function getPets(uint256 page) external view override returns (Pet[] memory,uint256) {
         require(page >= 1, "page must >= 1");
         uint256 size = 20;
@@ -84,7 +75,6 @@ contract NFTPet is ERC721('NFT PET', 'NFT.PET'), Manager, INFTPet {
         }
         return (pets,balance);
     }
-    //通过URI获取tokenURI
     function tokenUri(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
@@ -102,17 +92,14 @@ contract NFTPet is ERC721('NFT PET', 'NFT.PET'), Manager, INFTPet {
         // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
         return base;
     }
-    //设置TokenURI
     function setTokenURI(uint256 _tokenId) internal virtual {
         Pet memory pet = getPetByTokenId(_tokenId);
         string memory _tokenURI = serialProperty.serialToURI[pet.serialNum];
         _setTokenURI(_tokenId, _tokenURI);
     }
-    //设置BaseURI
     function setBaseURI(string memory _baseURI) public override onlyManagers {
         _setBaseURI(_baseURI);
     }
-    //添加编号属性
     function addSerialProperty(string memory _uri, uint64 _addition) public override onlyManagers {
         serialProperty.len += 1;
         uint64 _serialNum = uint64(serialProperty.len);
@@ -121,19 +108,16 @@ contract NFTPet is ERC721('NFT PET', 'NFT.PET'), Manager, INFTPet {
         serialProperty.serialToAddition[_serialNum] = _addition;
         emit AddSerialProperty(_serialNum, _uri, _addition);
     }
-    //更新编号属性
     function updateSerialProperty(uint64 _serialNum, string memory _uri, uint64 _addition) public override onlyManagers {
         require(serialProperty.exist[_serialNum], "serialNum not exist");
         serialProperty.serialToURI[_serialNum] = _uri;
         serialProperty.serialToAddition[_serialNum] = _addition;
         emit UpdateSerialProperty(_serialNum, _uri, _addition);
     }
-    //获取编号对应的URI,和额外加成
     function getSerialPropertyByNum(uint64 _serialNum) external view override returns (string memory, uint64) {
         require(serialProperty.exist[_serialNum], "this serial num not exist");
         return (serialProperty.serialToURI[_serialNum], serialProperty.serialToAddition[_serialNum]);
     }
-    //获取编号数量
     function getSerialLen() external override view returns (uint256) {
         return serialProperty.len;
     }

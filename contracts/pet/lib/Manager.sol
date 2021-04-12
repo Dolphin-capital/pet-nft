@@ -4,7 +4,6 @@ import "./access/Ownable.sol";
 
 
 abstract contract Manager is Ownable {
-    //管理员地址映射
     mapping(address => bool) public managers;
 
     constructor () internal {
